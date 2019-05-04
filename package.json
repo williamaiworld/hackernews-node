@@ -1,0 +1,23 @@
+{
+  "name": "hackernews-node",
+  "version": "1.0.0",
+  "description": "GraphQL Server to implement GraphQL query",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "test",
+    "start": "nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wallacepreston/hackernews-node.git"
+  },
+  "author": "Preston Wallace",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wallacepreston/hackernews-node/issues"
+  },
+  "homepage": "https://github.com/wallacepreston/hackernews-node#readme",
+  "dependencies": {
+    "graphql-yoga": "^1.17.4"
+  }
+}
