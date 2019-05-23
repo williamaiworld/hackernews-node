@@ -1,18 +1,10 @@
 const { GraphQLServer } = require('graphql-yoga')
 require('dotenv').config();
-// 1
+const { db, Property, User } = require('../db')
 
-const typeDefs = `
-type Query {
-  info: String!
-  feed: [Link!]!
-}
-type Link {
-  id: ID!
-  description: String!
-  url: String!
-}
-`
+db.sync();
+console.log(`db synced at ${process.env.DATABASE_URL}`)
+
 let links = [{
   id: 'link-0',
   url: 'www.howtographql.com',
@@ -29,27 +21,56 @@ let links = [{
   description: 'Fullstack tutorial for GraphQL, THIRD example'
 }]
 
-// 2
+let idCount = links.length
 const resolvers = {
   Query: {
     info: () => `This is the API of a Hackernews Clone`,
     feed: () => links,
+    properties: () => Property.findAll(),
   },
-  Link: {
-    // id: (parent) => parent.id,
-    // description: (parent) => parent.description,
-    // url: (parent) => parent.url,
+  Mutation: {
+    post: (parent, args) => {
+      const link = {
+        id: `link-${idCount++}`,
+        description: args.description,
+        url: args.url,
+      }
+      links.push(link)
+      return link
+    },
+    updateLink: (parent, {id, url, description}) => {
+      const linkIdx = links.indexOf(links.filter(link => {
+        return link.id === `link-${id}`
+      })[0])
+      if(url) links[linkIdx].url = url;
+      if(description) links[linkIdx].description = description;
+      return links[linkIdx]
+    },
+    deleteLink: (parent, {id}) => {
+      const linkIdx = links.indexOf(links.filter(link => {
+        return link.id === `link-${id}`
+      })[0])
+      const link = links[linkIdx];
+      delete links[linkIdx];
+      return link;
+    },
+    addProperty: (parent, { city, address, description }) => {
+      const property = Property.create({
+        city,
+        address,
+        description,
+      })
+      return property
+    }
   }
 }
 const options = {
   port: process.env.PORT,
 }
 
-// 3
 const server = new GraphQLServer({
-  typeDefs,
+  typeDefs: './src/schema.graphql',
   resolvers,
 })
-console.log('port: ', process.env.PORT)
 
 server.start(options, () => console.log(`Server is running on http://localhost:${options.port}`))
